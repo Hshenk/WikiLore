@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lyndryss WikiLore</title>
+
+  <!-- Amarante: the display font shared with the campaign map, so the two
+       sites feel like one product. Single 400 weight. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amarante&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="app-header">
+      <a class="site-title" href="#/">Lyndryss <span class="site-title__accent">WikiLore</span></a>
+      <div class="header-actions">
+        <!-- The search box (Guide 06) and the GM login button (Guide 04)
+             will be added here in later guides. -->
+      </div>
+    </header>
+
+    <!-- All articles render into #content. JS owns everything inside it. -->
+    <main id="content" class="content">
+      <noscript>
+        <p class="notice">WikiLore needs JavaScript to load its articles.</p>
+      </noscript>
+    </main>
+
+    <footer class="app-footer">
+      A living chronicle of Lyndryss — companion to the
+      <a href="https://hshenk.github.io/Lyndryss-Map">campaign map</a>.
+    </footer>
+
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
