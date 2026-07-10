@@ -174,6 +174,128 @@ button {
   padding-left: 12px;
 }
 
+/* ---------- Article reader (Guide 03) ---------- */
+.back-link {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Markdown output inside a section body */
+.section-body ul,
+.section-body ol {
+  margin: 0 0 14px;
+  padding-left: 24px;
+}
+
+.section-body li {
+  margin-bottom: 4px;
+}
+
+.section-body blockquote {
+  margin: 0 0 14px;
+  padding: 8px 14px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--panel);
+  color: var(--text-muted);
+}
+
+.section-body blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.section-body code {
+  padding: 1px 5px;
+  font-size: 13px;
+  background: var(--panel-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.section-body hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.section-body img {
+  max-width: 100%;
+  border-radius: var(--radius);
+}
+
+/* If the GM uses #/##/### headings inside a body, style them as smaller
+   display headings so they sit under the real section heading. */
+.section-body h1,
+.section-body h2,
+.section-body h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  margin: 18px 0 8px;
+}
+
+.section-body h1 { font-size: 20px; }
+.section-body h2 { font-size: 18px; }
+.section-body h3 { font-size: 16px; }
+
+/* ---------- Home page article index (Guide 02) ---------- */
+.index-heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.article-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.index-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+  transition: background var(--ease), border-color var(--ease);
+}
+
+.index-link:hover {
+  background: var(--panel-raised);
+  border-color: var(--accent);
+}
+
+.index-link__title {
+  font-size: 16px;
+}
+
+.index-link__category {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+}
+
 /* ---------- Footer ---------- */
 .app-footer {
   padding: 14px 20px;
