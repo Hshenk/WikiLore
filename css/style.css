@@ -390,6 +390,131 @@ button {
   white-space: nowrap;
 }
 
+/* ---------- Editor (Guide 05) ---------- */
+.btn {
+  display: inline-block;
+  padding: 5px 12px;
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--panel-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--ease), color var(--ease);
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.btn--primary {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.btn--danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.index-new {
+  margin-bottom: 16px;
+}
+
+.article-edit {
+  margin-left: 14px;
+}
+
+.editor-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 28px;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.editor-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 16px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.ed-field {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.editor input:not([type="checkbox"]),
+.editor textarea {
+  width: 100%;
+  margin-top: 3px;
+  padding: 6px 8px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.editor input:focus,
+.editor textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ed-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ed-section {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.ed-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ed-section-head .ed-heading {
+  flex: 1;
+  margin-top: 0;
+}
+
+.ed-body {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.editor-status {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* ---------- Footer ---------- */
 .app-footer {
   padding: 14px 20px;

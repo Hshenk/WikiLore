@@ -7,7 +7,7 @@ export function clearElement(el) {
 }
 
 /** Render one article into container */
-export function renderArticle(article, container, linkTargets) {
+export function renderArticle(article, container, linkTargets, gm) {
     clearElement(container);
 
     const root = document.createElement("article");
@@ -19,9 +19,23 @@ export function renderArticle(article, container, linkTargets) {
     back.textContent = "← All articles";
     root.append(back);
 
+    if (gm) {
+        const edit = document.createElement("a");
+        edit.className = "back-link article-edit";
+        edit.href = "#/_edit/" + article.slug;
+        edit.textContent = "Edit ✎";
+        root.append(edit);
+    }
+
     const title = document.createElement("h1");
     title.className = "article-title";
     title.textContent = article.title;
+    if (article.visible === false) {
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "hidden";
+        title.append(badge);
+    }
     root.append(title);
 
     for (const section of article.sections) {
@@ -34,6 +48,10 @@ export function renderArticle(article, container, linkTargets) {
 function renderSection(section, linkTargets) {
     const wrap = document.createElement("section");
     wrap.className = "article-section";
+
+    if (section.hidden) {
+        wrap.classList.add("section--hidden");
+    }
 
     if (section.heading) {
         const h = document.createElement("h2");
@@ -53,13 +71,21 @@ function renderSection(section, linkTargets) {
 }
 
 /** Renders the homepage: A heading plus one linker per visible article */
-export function renderIndex(articles, container) {
+export function renderIndex(articles, container, gm) {
     clearElement(container);
 
     const heading = document.createElement("h1");
     heading.className = "index-heading";
     heading.textContent = "Articles";
     container.append(heading);
+
+    if (gm) {
+        const newLink = document.createElement("a");
+        newLink.className = "btn index-new";
+        newLink.href = "#/_new";
+        newLink.textContent = "+ New article";
+        container.append(newLink);
+    }
 
     const list = document.createElement("ul");
     list.className = "article-index";
@@ -74,6 +100,13 @@ export function renderIndex(articles, container) {
         title.className = "index-link__title";
         title.textContent = article.title;
         link.append(title);
+
+        if (article.visible === false) {
+            const badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = "hidden";
+            title.append(badge);
+        }
 
         if (article.category) {
             const category = document.createElement("span");
