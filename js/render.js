@@ -1,14 +1,23 @@
+import { marked } from "https://esm.sh/marked@12";
+
+
 
 export function clearElement(el) {
     el.replaceChildren();
 }
 
 /** Render one article into container */
-export function renderArticle(article, container) {
+export function renderArticle(article, container, linkTargets) {
     clearElement(container);
 
     const root = document.createElement("article");
     root.className = "article";
+
+    const back = document.createElement("a");
+    back.className = "back-link";
+    back.href = "#/";
+    back.textContent = "← All articles";
+    root.append(back);
 
     const title = document.createElement("h1");
     title.className = "article-title";
@@ -16,13 +25,13 @@ export function renderArticle(article, container) {
     root.append(title);
 
     for (const section of article.sections) {
-        root.append(renderSection(section));
+        root.append(renderSection(section, linkTargets));
     }
 
     container.append(root);
 }
 
-function renderSection(section) {
+function renderSection(section, linkTargets) {
     const wrap = document.createElement("section");
     wrap.className = "article-section";
 
@@ -33,11 +42,12 @@ function renderSection(section) {
         wrap.append(h);
     }
 
-    for (const text of section.body.split("\n\n")) {
-        const p = document.createElement("p");
-        p.textContent = text;
-        wrap.append(p);
-    }
+    // The one sactioned innerHTML: GM-authored only
+    // When players write articles later, will need to be sanitized (DOMPurify)
+    const body = document.createElement("div");
+    body.className = "section-body";
+    body.innerHTML = marked.parse(resolveWikiLinks(section.body, linkTargets));
+    wrap.append(body);
 
     return wrap;
 }
@@ -87,4 +97,19 @@ export function renderNotice(message, container, isError) {
     box.className = isError ? "notice notice--error" : "notice";
     box.textContent = message;
     container.append(box);
+}
+
+/**
+ * [[Article Title]] / [[Article Title | shown text]] -> markdown links, but
+ * only when the target is in the visible list. Anything else becomes plain prose.
+ */
+function resolveWikiLinks(body, linkTargets) {
+    return body.replace(/\[\[([^\[\]|]+)(?:\|([^\[\]]+))?\]\]/g, (match, target, display) => {
+        const slug = linkTargets.get(target.trim().toLowerCase());
+        const text = (display || target).trim();
+        if (!slug) {
+            return text;
+        }
+        return "[" + text + "](#/" + slug + ")";
+    });
 }

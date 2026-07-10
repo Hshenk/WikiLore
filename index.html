@@ -19,8 +19,31 @@
     <header class="app-header">
       <a class="site-title" href="#/">Lyndryss <span class="site-title__accent">WikiLore</span></a>
       <div class="header-actions">
-        <!-- The search box (Guide 06) and the GM login button (Guide 04)
-             will be added here in later guides. -->
+        <!-- The search box (Guide 06) will be added here later. -->
+
+        <button id="gm-login-toggle" class="header-btn" type="button">GM</button>
+
+        <!-- Dropdown panel: shows the sign-in form when signed out, the
+             signed-in block when the GM session is active. JS toggles
+             .is-hidden on the panel and swaps which child is visible. -->
+        <div id="gm-login-panel" class="gm-panel is-hidden">
+          <form id="gm-login-form">
+            <label class="gm-panel__field">
+              <span>Email</span>
+              <input id="gm-email" type="email" autocomplete="username" required>
+            </label>
+            <label class="gm-panel__field">
+              <span>Password</span>
+              <input id="gm-password" type="password" autocomplete="current-password" required>
+            </label>
+            <button class="header-btn header-btn--primary" type="submit">Sign in</button>
+            <p id="gm-login-error" class="gm-panel__error is-hidden"></p>
+          </form>
+          <div id="gm-signed-in" class="is-hidden">
+            <p class="gm-panel__status">Signed in as GM — omniscient view.</p>
+            <button id="gm-signout" class="header-btn" type="button">Sign out</button>
+          </div>
+        </div>
       </div>
     </header>
 
