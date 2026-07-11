@@ -1,5 +1,5 @@
 import { marked } from "https://esm.sh/marked@12";
-
+import DOMPurify from "https://esm.sh/dompurify@3";
 
 
 export function clearElement(el) {
@@ -19,7 +19,7 @@ export function renderArticle(article, container, linkTargets, gm) {
     back.textContent = "← All articles";
     root.append(back);
 
-    if (gm) {
+    if (gm || article.mine) {
         const edit = document.createElement("a");
         edit.className = "back-link article-edit";
         edit.href = "#/_edit/" + article.slug;
@@ -32,11 +32,18 @@ export function renderArticle(article, container, linkTargets, gm) {
     title.textContent = article.title;
     if (article.visible === false) {
         const badge = document.createElement("span");
-        badge.className = "badge";
-        badge.textContent = "hidden";
+        badge.className = article.author_name ? "badge badge--private" : "badge";
+        badge.textContent = article.author_name ? "private" : "hidden";
         title.append(badge);
     }
     root.append(title);
+
+    if (article.author_name) {
+        const byline = document.createElement("p");
+        byline.className = "article-byline";
+        byline.textContent = "by " + article.author_name;
+        root.append(byline);
+    }
 
     for (const section of article.sections) {
         root.append(renderSection(section, linkTargets));
@@ -60,11 +67,10 @@ function renderSection(section, linkTargets) {
         wrap.append(h);
     }
 
-    // The one sactioned innerHTML: GM-authored only
-    // When players write articles later, will need to be sanitized (DOMPurify)
+
     const body = document.createElement("div");
     body.className = "section-body";
-    body.innerHTML = marked.parse(resolveWikiLinks(section.body, linkTargets));
+    body.innerHTML = DOMPurify.sanitize(marked.parse(resolveWikiLinks(section.body, linkTargets)));
     wrap.append(body);
 
     return wrap;
@@ -87,7 +93,22 @@ export function renderIndex(articles, container, gm) {
         container.append(newLink);
     }
 
+    const lore = articles.filter((article) => !article.author_name);
+    const notes = articles.filter((article) => article.author_name);
 
+    renderGroups(lore, container);
+
+    if (notes.length > 0) {
+        const playerHeading = document.createElement("h1");
+        playerHeading.className = "index-heading index-heading--player";
+        playerHeading.textContent = "Player Articles";
+        container.append(playerHeading);
+        renderGroups(notes, container);
+    }
+}
+
+
+function renderGroups(articles, container) {
     const groups = new Map();
     for (const article of articles) {
         const category = article.category || "Uncategorized";
@@ -119,9 +140,16 @@ export function renderIndex(articles, container, gm) {
 
             if (article.visible === false) {
                 const badge = document.createElement("span");
-                badge.className = "badge";
-                badge.textContent = "hidden";
+                badge.className = article.author_name ? "badge badge--private" : "badge";
+                badge.textContent = article.author_name ? "private" : "hidden";
                 title.append(badge);
+            }
+
+            if (article.author_name) {
+                const author = document.createElement("span");
+                author.className = "index-link__author";
+                author.textContent = "by " + article.author_name;
+                link.append(author);
             }
 
             item.append(link)
@@ -131,6 +159,7 @@ export function renderIndex(articles, container, gm) {
         container.append(list);
     }
 }
+
 
 
 /** Replace the content area with a notice box */

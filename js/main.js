@@ -1,7 +1,7 @@
 import { SITE_TITLE } from "./config.js";
 import { renderIndex, renderNotice, renderArticle } from "./render.js";
-import { initLive, fetchArticleList, fetchArticle, fetchArticleListGm, 
-         fetchArticleGm, resolveSession, signIn, signOut, gmActive } from "./live.js";
+import { initLive, fetchArticleList, fetchArticle, resolveSession, 
+         signIn, signOut, gmActive, isSignedIn, getDisplayName, saveDisplayName } from "./live.js";
 import { openEditor } from "./editor.js";
 import { initSearch } from "./search.js";
 
@@ -11,7 +11,7 @@ let linkTargets = new Map();
 
 
 async function refreshData() {
-    articleList = gmActive() ? await fetchArticleListGm() : await fetchArticleList();
+    articleList = await fetchArticleList();
 
     linkTargets = new Map();
     for (const article of articleList) {
@@ -27,12 +27,12 @@ async function route() {
     window.scrollTo(0, 0);
 
     if (!slug) {
-        renderIndex(articleList, content, gmActive());
+        renderIndex(articleList, content, isSignedIn());
         return;
     }
 
     if (slug === "_new" || slug.startsWith("_edit/")) {
-        if (!gmActive()) {
+        if (!isSignedIn()) {
             renderNotice(
                 "There is no article here - at least, none that you can see.",
                 content, false);
@@ -49,8 +49,7 @@ async function route() {
 
     renderNotice("Loading...", content, false);
     try {
-        const article = gmActive() ? await fetchArticleGm(slug)
-                                   : await fetchArticle(slug);
+        const article = await fetchArticle(slug);
         if (!article) {
             renderNotice(
                 "There is no article here - at least, none that you can see.",
@@ -67,9 +66,25 @@ async function route() {
 // Sync the header to the current session state
 function updateHeader() {
     const toggle = document.querySelector("#gm-login-toggle");
-    document.querySelector("#gm-login-form").classList.toggle("is-hidden", gmActive());
-    document.querySelector("#gm-signed-in").classList.toggle("is-hidden", !gmActive());
+    const needsName = isSignedIn() && !gmActive() && !getDisplayName();
+
+    document.querySelector("#gm-login-form").classList.toggle("is-hidden", isSignedIn());
+    document.querySelector("#name-form").classList.toggle("is-hidden", !needsName);
+    document.querySelector("#gm-signed-in").classList.toggle("is-hidden",
+        !isSignedIn() || needsName);
+
     toggle.classList.toggle("header-btn--gm", gmActive());
+    if (gmActive()) {
+        toggle.textContent = "GM";
+    } else if (isSignedIn() && getDisplayName()) {
+        toggle.textContent = getDisplayName();
+    } else {
+        toggle.textContent = "Sign in";
+    }
+
+    document.querySelector("#session-status").textContent = gmActive()
+        ? "Signed in as GM - omniscient view."
+        : "Signed in as " + (getDisplayName() || "...");
 }
 
 // One-time even hookup for GM button
@@ -96,14 +111,28 @@ function wireHeader() {
             return;
         }
 
-        if (!gmActive()) {
-            await signOut();
-            errorBox.textContent = "That account signed in, but is not a GM.";
-            errorBox.classList.remove("is-hidden");
+        form.reset();
+        updateHeader();
+        if (gmActive() || getDisplayName()) {
+            panel.classList.add("is-hidden");
+        }
+        await refreshData();
+        route();
+    });
+
+    document.querySelector("#name-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const nameError = document.querySelector("#name-error");
+        nameError.classList.add("is-hidden");
+
+        try {
+            await saveDisplayName(document.querySelector("#name-input").value.trim());
+        } catch (err) {
+            nameError.textContent = err.message;
+            nameError.classList.remove("is-hidden");
             return;
         }
 
-        form.reset();
         panel.classList.add("is-hidden");
         updateHeader();
         await refreshData();

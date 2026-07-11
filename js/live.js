@@ -33,20 +33,46 @@ export async function fetchArticle(slug) {
 
 // ===================== GM Auth =====================
 let isGm = false;
+let userId = null;
+let displayName = null;
 
 export function gmActive() {
     return isGm;
 }
 
+export function isSignedIn() {
+    return userId !== null;
+}
+
+export function getDisplayName() {
+    return displayName;
+}
+
+export function getUserId() {
+    return userId;
+}
+
+// Work out if annon, player, or GM
 export async function resolveSession() {
+    isGm = false;
+    userId = null;
+    displayName = null;
+
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
-        isGm = false;
-        return false;
+        return;
     }
-    const { data: gmFlag, error } = await supabase.rpc("is_gm");
-    isGm = !error && gmFlag === true;
-    return isGm;
+    userId = data.session.user.id;
+
+    const { data: gmFlag } = await supabase.rpc("is_gm");
+    isGm = gmFlag === true;
+
+    const { data: profile } = await supabase
+        .from("wiki_authors")
+        .select("display_name")
+        .eq("user_id", userId)
+        .maybeSingle()
+    displayName = profile ? profile.display_name : null;
 }
 
 export async function signIn(email, password) {
@@ -60,46 +86,18 @@ export async function signIn(email, password) {
 export async function signOut() {
     await supabase.auth.signOut();
     isGm = false;
+    userId = null;
+    displayName = null;
 }
 
-// ===================== GM Read Paths =====================
-
-export async function fetchArticleListGm() {
-    const { data, error } = await supabase
-        .from("wiki_articles")
-        .select("slug, title, category, visible")
-        .order("title");
+export async function saveDisplayName(name) {
+    const { error } = await supabase
+        .from("wiki_authors")
+        .insert({ user_id: userId, display_name: name });
     if (error) {
-        throw new Error("Couldn't load the GM article list: " + error.message);
+        throw new Error("Couldn't save that name: " + error.message);
     }
-    return data;
-}
-
-// Fetch one article, including all secret sections
-export async function fetchArticleGm(slug) {
-    const { data, error } = await supabase
-        .from("wiki_articles")
-        .select("id, slug, title, category, visible, wiki_sections(heading, body, hidden, position)")
-        .eq("slug", slug)
-        .maybeSingle();
-    if (error) {
-        throw new Error("Couldn't load the article (GM): " + error.message);
-    }
-    if (!data) {
-        return null;
-    }
-
-    const sections = data.wiki_sections;
-    sections.sort((a, b) => a.position - b.position);
-
-    return {
-        id: data.id,
-        slug: data.slug,
-        title: data.title,
-        category: data.category,
-        visible: data.visible,
-        sections: sections,
-    };
+    displayName = name;
 }
 
 // ===================== GM writes new articles =====================

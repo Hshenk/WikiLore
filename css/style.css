@@ -261,6 +261,28 @@ button {
   color: var(--text-muted);
 }
 
+/* ---------- Player articles (Guide 07) ---------- */
+.badge--private {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.article-byline {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.index-heading--player {
+  margin-top: 40px;
+}
+
+.index-link__author {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* ---------- "hidden" badges (GM omniscient view) ---------- */
 .badge {
   display: inline-block;

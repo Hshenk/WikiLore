@@ -3,7 +3,8 @@
  */
 
 import { clearElement, renderNotice } from "./render.js";
-import { fetchArticleGm, createArticle, updateArticle, replaceSections, deleteArticle } from "./live.js";
+import { fetchArticle, createArticle, updateArticle, replaceSections, deleteArticle,
+         gmActive, getUserId } from "./live.js";
 
 // Static skeletons ONLY — never interpolate article data into these.
 const EDITOR_HTML = `
@@ -16,10 +17,11 @@ const EDITOR_HTML = `
             <input id="ed-slug" placeholder="left blank = made from the title"></label>
         <label class="ed-field">Category
             <input id="ed-category"></label>
-        <label class="ed-field">Map location id
+        <label class="ed-field" id="ed-location-field">Map location id
             <input id="ed-location" placeholder="burg7, poi3, …"></label>
         <label class="ed-check">
-            <input type="checkbox" id="ed-visible"> Visible to players</label>
+            <input type="checkbox" id="ed-visible">
+            <span id="ed-visible-label">Visible to players</span></label>
     </div>
     <div id="ed-sections"></div>
     <div class="editor-actions">
@@ -98,9 +100,15 @@ function collectForm() {
 export async function openEditor(slug, container, onSaved) {
     let article = null;
     if (slug) {
-        article = await fetchArticleGm(slug);
+        article = await fetchArticle(slug);
         if (!article) {
             renderNotice("No article with slug '" + slug + "'.", container, true);
+            return;
+        }
+
+        if (!gmActive() && !article.mine) {
+            renderNotice("Only this article's author and the GM can edit it.",
+                container, true);
             return;
         }
     }
@@ -129,6 +137,11 @@ export async function openEditor(slug, container, onSaved) {
         sectionsBox.append(buildSectionRow({ heading: "", body: "", hidden: true }));
     }
 
+    if (!gmActive()) {
+        root.querySelector("#ed-visible-label").textContent = "Public (anyone can read it)";
+        root.querySelector("#ed-location-field").classList.add("is-hidden");
+    }
+
     const status = root.querySelector("#ed-status");
 
     root.querySelector("#ed-add-section").addEventListener("click", () => {
@@ -144,6 +157,10 @@ export async function openEditor(slug, container, onSaved) {
         }
         if (!meta.slug) {
             meta.slug = slugify(meta.title);
+        }
+
+        if (!article && !gmActive()) {
+            meta.author_id = getUserId();
         }
 
         status.textContent = "Saving…";
