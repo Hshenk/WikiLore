@@ -164,3 +164,11 @@ export async function deleteArticle(id) {
         throw new Error("Couldn't delete the article: " + error.message);
     }
 }
+
+export async function searchArticles(term) {
+    const { data, error } = await supabase.rpc("wiki_search", { term: term });
+    if (error) {
+        throw new Error("Search failed: " + error.message);
+    }
+    return data;
+}

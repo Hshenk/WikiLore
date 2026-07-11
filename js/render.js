@@ -87,39 +87,49 @@ export function renderIndex(articles, container, gm) {
         container.append(newLink);
     }
 
-    const list = document.createElement("ul");
-    list.className = "article-index";
 
+    const groups = new Map();
     for (const article of articles) {
-        const item = document.createElement("li");
-        const link = document.createElement("a");
-        link.className = "index-link";
-        link.href = "#/" + article.slug;
-
-        const title = document.createElement("span");
-        title.className = "index-link__title";
-        title.textContent = article.title;
-        link.append(title);
-
-        if (article.visible === false) {
-            const badge = document.createElement("span");
-            badge.className = "badge";
-            badge.textContent = "hidden";
-            title.append(badge);
+        const category = article.category || "Uncategorized";
+        if (!groups.has(category)) {
+            groups.set(category, []);
         }
-
-        if (article.category) {
-            const category = document.createElement("span");
-            category.className = "index-link__category";
-            category.textContent = article.category;
-            link.append(category);
-        }
-
-        item.append(link);
-        list.append(item);
+        groups.get(category).push(article);
     }
 
-    container.append(list);
+    for (const category of [...groups.keys()].sort()) {
+        const catHeading = document.createElement("h2");
+        catHeading.className = "index-category-heading";
+        catHeading.textContent = category;
+        container.append(catHeading);
+
+        const list = document.createElement("ul");
+        list.className = "article-index";
+
+        for (const article of groups.get(category)) {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.className = "index-link";
+            link.href = "#/" + article.slug;
+
+            const title = document.createElement("span");
+            title.className = "index-link__title";
+            title.textContent = article.title;
+            link.append(title);
+
+            if (article.visible === false) {
+                const badge = document.createElement("span");
+                badge.className = "badge";
+                badge.textContent = "hidden";
+                title.append(badge);
+            }
+
+            item.append(link)
+            list.append(item)
+        }
+
+        container.append(list);
+    }
 }
 
 

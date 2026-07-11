@@ -3,6 +3,7 @@ import { renderIndex, renderNotice, renderArticle } from "./render.js";
 import { initLive, fetchArticleList, fetchArticle, fetchArticleListGm, 
          fetchArticleGm, resolveSession, signIn, signOut, gmActive } from "./live.js";
 import { openEditor } from "./editor.js";
+import { initSearch } from "./search.js";
 
 
 let articleList = [];
@@ -133,6 +134,7 @@ async function boot() {
         renderNotice(err.message, document.querySelector("#content"), true);
         return;
     }
+    initSearch(() => articleList);
 
     window.addEventListener("hashchange", route);
     route();

@@ -19,7 +19,10 @@
     <header class="app-header">
       <a class="site-title" href="#/">Lyndryss <span class="site-title__accent">WikiLore</span></a>
       <div class="header-actions">
-        <!-- The search box (Guide 06) will be added here later. -->
+        <div class="search-wrap">
+          <input id="search-box" type="search" placeholder="Search the lore…" autocomplete="off">
+          <div id="search-results" class="search-results is-hidden"></div>
+        </div>
 
         <button id="gm-login-toggle" class="header-btn" type="button">GM</button>
 
