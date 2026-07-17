@@ -150,6 +150,10 @@ function wireHeader() {
 
 
 async function boot() {
+    if (new URLSearchParams(window.location.search).has("embed")) {
+        document.body.classList.add("embed");
+    }
+
     document.title = SITE_TITLE;
     initLive();
 

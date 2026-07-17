@@ -1,5 +1,6 @@
 import { marked } from "https://esm.sh/marked@12";
 import DOMPurify from "https://esm.sh/dompurify@3";
+import { MAP_URL } from "./config.js";
 
 
 export function clearElement(el) {
@@ -25,6 +26,16 @@ export function renderArticle(article, container, linkTargets, gm) {
         edit.href = "#/_edit/" + article.slug;
         edit.textContent = "Edit ✎";
         root.append(edit);
+    }
+
+    if (article.location_id) {
+        const mapLink = document.createElement("a");
+        mapLink.className = "back-link article-map-link";
+        mapLink.href = MAP_URL + "#marker=" + article.location_id;
+        mapLink.target = "_blank";
+        mapLink.rel = "noopener";
+        mapLink.textContent = "Show on map";
+        root.append(mapLink);
     }
 
     const title = document.createElement("h1");

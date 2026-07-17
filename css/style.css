@@ -529,6 +529,44 @@ button {
   margin-left: 14px;
 }
 
+/* "Show on map 🗺" link on articles that carry a location_id (Guide 09). */
+.article-map-link {
+  float: right;
+  margin-left: 14px;
+}
+
+/* ---------- Embed mode (map integration, Guide 09) ---------- */
+/* main.js adds body.embed when the page loads with ?embed=1 — the campaign
+   map shows this page inside its lore side-panel iframe. Strip the site
+   chrome down to the article column and blend into the map's panel color.
+   Wiki-links keep working, so the panel is a tiny browsable wiki. */
+body.embed {
+  background: var(--panel);
+}
+
+body.embed .app-header,
+body.embed .app-footer {
+  display: none;
+}
+
+body.embed .content {
+  max-width: none;
+  padding: 14px 16px 40px;
+}
+
+body.embed .article-title {
+  font-size: 26px;
+}
+
+body.embed .section-heading {
+  font-size: 19px;
+}
+
+/* Already on the map — pointing back at it from inside the panel is noise. */
+body.embed .article-map-link {
+  display: none;
+}
+
 .editor-title {
   font-family: var(--font-display);
   font-weight: 400;
