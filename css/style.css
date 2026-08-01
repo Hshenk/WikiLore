@@ -249,10 +249,21 @@ button {
   border-color: var(--accent);
 }
 
+.gm-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .gm-panel__error {
   margin: 10px 0 0;
   font-size: 12px;
   color: var(--danger);
+}
+
+/* Same slot, non-alarming: "check your email to confirm" and friends. */
+.gm-panel__error.is-ok {
+  color: var(--text-muted);
 }
 
 .gm-panel__status {

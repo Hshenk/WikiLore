@@ -40,9 +40,15 @@
             </label>
             <label class="gm-panel__field">
               <span>Password</span>
-              <input id="gm-password" type="password" autocomplete="current-password" required>
+              <input id="gm-password" type="password" autocomplete="current-password"
+                     required minlength="6">
             </label>
-            <button class="header-btn header-btn--primary" type="submit">Sign in</button>
+            <div class="gm-panel__actions">
+              <button class="header-btn header-btn--primary" type="submit">Sign in</button>
+              <button id="gm-signup" class="header-btn" type="button">Create account</button>
+            </div>
+            <!-- JS sets the text and toggles .is-hidden / .is-ok — errors read red,
+                 the "check your email" confirmation reads muted. -->
             <p id="gm-login-error" class="gm-panel__error is-hidden"></p>
           </form>
           <!-- First-time players pick a public display name (Guide 07). -->

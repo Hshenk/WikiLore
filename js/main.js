@@ -1,7 +1,8 @@
 import { SITE_TITLE } from "./config.js";
 import { renderIndex, renderNotice, renderArticle } from "./render.js";
 import { initLive, fetchArticleList, fetchArticle, resolveSession, 
-         signIn, signOut, gmActive, isSignedIn, getDisplayName, saveDisplayName } from "./live.js";
+         signIn, signOut, gmActive, isSignedIn, getDisplayName, 
+         saveDisplayName, signUp } from "./live.js";
 import { openEditor } from "./editor.js";
 import { initSearch } from "./search.js";
 
@@ -28,6 +29,11 @@ async function route() {
 
     if (!slug) {
         renderIndex(articleList, content, isSignedIn());
+        return;
+    }
+
+    if (slug.includes("access_token") || slug.startsWith("error")) {
+        window.location.hash = "#/";
         return;
     }
 
@@ -78,6 +84,8 @@ function updateHeader() {
         toggle.textContent = "GM";
     } else if (isSignedIn() && getDisplayName()) {
         toggle.textContent = getDisplayName();
+    } else if (isSignedIn()) {
+        toggle.textContent = "Finish setup";
     } else {
         toggle.textContent = "Sign in";
     }
@@ -100,6 +108,7 @@ function wireHeader() {
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
         errorBox.classList.add("is-hidden");
+        errorBox.classList.remove("is-ok");
 
         try {
             await signIn(
@@ -116,6 +125,41 @@ function wireHeader() {
         if (gmActive() || getDisplayName()) {
             panel.classList.add("is-hidden");
         }
+        await refreshData();
+        route();
+    });
+
+    document.querySelector("#gm-signup").addEventListener("click", async () => {
+        errorBox.classList.add("is-hidden");
+        errorBox.classList.remove("is-ok");
+        const email = document.querySelector("#gm-email").value.trim();
+        const password = document.querySelector("#gm-password").value;
+
+        if (!email || password.length < 6) {
+            errorBox.textContent = "Enter an email and a password of at least 6 characters.";
+            errorBox.classList.remove("is-hidden");
+            return;
+        }
+
+        let result;
+        try {
+            result = await signUp(email, password);
+        } catch (err) {
+            errorBox.textContent = err.message;
+            errorBox.classList.remove("is-hidden");
+            return;
+        }
+
+        if (result.needsConfirm) {
+            errorBox.textContent = 
+                "Account created. Check your email for the confirmation link, then sign in.";
+            errorBox.classList.add("is-ok");
+            errorBox.classList.remove("is-hidden");
+            return;
+        }
+
+        form.reset();
+        updateHeader();
         await refreshData();
         route();
     });
@@ -160,6 +204,11 @@ async function boot() {
     await resolveSession();
     wireHeader();
     updateHeader();
+
+    // If we need to set up a display name still, open the panel
+    if (isSignedIn() && !gmActive() && !getDisplayName()) {
+        document.querySelector("#gm-login-panel").classList.remove("is-hidden");
+    }
 
     try {
         await refreshData();
