@@ -175,8 +175,9 @@ export async function deleteArticle(id) {
     }
 }
 
-export async function searchArticles(term) {
-    const { data, error } = await supabase.rpc("wiki_search", { term: term });
+export async function searchArticles(term, unlinkedOnly) {
+    const rpcName = unlinkedOnly ? "wiki_search_unlinked" : "wiki_search";
+    const { data, error } = await supabase.rpc(rpcName, { term: term });
     if (error) {
         throw new Error("Search failed: " + error.message);
     }

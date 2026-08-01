@@ -40,22 +40,35 @@ function closeSearch(input, results) {
 }
 
 async function runSearch(input, results) {
-    const term = input.value.trim();
+    let term = input.value.trim();
+
+    // "-l term" : searches only for that term if it is missing a link
+    let unlinkedOnly = false;
+    if (term === "-l" || term.startsWith("-l")) {
+        unlinkedOnly = true;
+        term = term.slice(2).trim();
+    }
+
     if (term.length < 2) {
         results.classList.add("is-hidden");
         return;
     }
 
-    // Instant half: from titles cached
-    const lower = term.toLowerCase();
-    const hits = getArticles()
-        .filter((article) => article.title.toLowerCase().includes(lower))
-        .map((article) => ({ slug: article.slug, title: article.title, snippet: "" }));
-    
+    // Instant half: from titles cached. Only check if not searching missing links
+    const hits = [];
+    if (!unlinkedOnly) {
+        const lower = term.toLowerCase();
+        for (const article of getArticles()) {
+            if (article.title.toLowerCase().includes(lower)) {
+                hits.push({ slug: article.slug, title: article.title, snippet: "" });
+            }
+        }
+    }
+
     // Server half: Body text 
     const seen = new Set(hits.map((hit) => hit.slug));
     try {
-        for (const hit of await searchArticles(term)) {
+        for (const hit of await searchArticles(term, unlinkedOnly)) {
             if (!seen.has(hit.slug)) {
                 hits.push(hit);
             }
@@ -64,17 +77,30 @@ async function runSearch(input, results) {
         console.warn(err.message);
     }
 
-    renderResults(hits, results);
+    if (unlinkedOnly) {
+        hits.sort((a, b) => Number(a.has_link) - Number(b.has_link));
+    }
+
+    renderResults(hits, results, unlinkedOnly);
 }
 
-function renderResults(hits, results) {
+function renderResults(hits, results, unlinkedOnly) {
     results.replaceChildren();
     results.classList.remove("is-hidden");
+
+    if (unlinkedOnly) {
+        const mode = document.createElement("p");
+        mode.className = "search-mode";
+        mode.textContent = "Unlinked mentions only";
+        results.append(mode);
+    }
 
     if (hits.length === 0) {
         const none = document.createElement("p");
         none.className = "search-empty";
-        none.textContent = "Nothing found.";
+        none.textContent = unlinkedOnly
+            ? "No unlinked mentions - everything is already linked."
+            : "Nothing found - or nothing revealed."
         results.append(none);
         return;
     }
@@ -88,6 +114,14 @@ function renderResults(hits, results) {
         title.className = "search-hit__title";
         title.textContent = hit.title;
         link.append(title);
+
+        if (hit.has_link === false) {
+            link.classList.add("search-hit--needs-link");
+            const flag = document.createElement("span");
+            flag.className = "search-hit__flag";
+            flag.textContent = "no link yet";
+            title.append(flag);
+        }
 
         if (hit.snippet) {
             const snippet = document.createElement("span");

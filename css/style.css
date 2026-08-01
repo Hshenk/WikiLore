@@ -22,6 +22,7 @@
   --accent: #5aa9e6;        /* links, interactive highlights */
   --accent-soft: rgba(90, 169, 230, 0.18);
   --danger: #e06c5c;
+  --warn: #d9a441;          /* "needs your attention", not "something broke" */
   --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   --radius: 8px;
   --radius-sm: 5px;
@@ -155,6 +156,21 @@ button {
   background: var(--accent-soft);
 }
 
+/* -l search: this article never links the term anywhere — the actionable case.
+   padding-left compensates for the border so titles stay aligned. */
+.search-hit--needs-link {
+  border-left: 3px solid var(--warn);
+  padding-left: 7px;
+}
+
+.search-hit__flag {
+  margin-left: 8px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--warn);
+}
+
 .search-hit__title {
   display: block;
   font-size: 14px;
@@ -172,6 +188,17 @@ button {
   padding: 8px 10px;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+/* Banner shown while a search modifier like "-l" is active. */
+.search-mode {
+  margin: 0 0 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
 }
 
 /* ---------- Index category groups (Guide 06) ---------- */
