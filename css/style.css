@@ -86,17 +86,32 @@ button {
   box-shadow: var(--shadow);
 }
 
+/* Wrapper only — the two words are separate links. The newline between them
+   in the HTML collapses to the single space that used to be there. */
 .site-title {
   font-family: var(--font-display);
   font-size: 22px;
   color: var(--text);
-  text-decoration: none;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
 
+.site-title__home,
+.site-title__accent {
+  text-decoration: none;
+}
+
+.site-title__home {
+  color: var(--text);
+}
+
 .site-title__accent {
   color: var(--accent);
+}
+
+.site-title__home:hover,
+.site-title__accent:hover {
+  text-decoration: underline;
 }
 
 .header-actions {

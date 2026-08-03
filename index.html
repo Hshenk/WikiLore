@@ -20,7 +20,13 @@
   <div class="app">
 
     <header class="app-header">
-      <a class="site-title" href="#/">Lyndryss <span class="site-title__accent">WikiLore</span></a>
+      <!-- Two separate links: "Lyndryss" goes up to the hub, "WikiLore"
+           returns to this site's index. (Links can't nest, so the wrapper
+           is a plain div.) -->
+      <div class="site-title">
+        <a class="site-title__home" href="https://lyndryss.com/">Lyndryss</a>
+        <a class="site-title__accent" href="#/">WikiLore</a>
+      </div>
       <div class="header-actions">
         <div class="search-wrap">
           <input id="search-box" type="search" placeholder="Search the lore…" autocomplete="off">
@@ -79,7 +85,7 @@
 
     <footer class="app-footer">
       A living chronicle of Lyndryss — companion to the
-      <a href="https://hshenk.github.io/Lyndryss-Map">campaign map</a>.
+      <a href="https://map.lyndryss.com">campaign map</a>.
     </footer>
 
   </div>
