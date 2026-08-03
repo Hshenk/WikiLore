@@ -4,11 +4,14 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./config.js";
+import { cookieStorage } from "./session-storage.js";
 
 let supabase = null;
 
 export function initLive() {
-    supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: { storage: cookieStorage },
+    });
 }
 
 /** Visible Articles for the home page */
