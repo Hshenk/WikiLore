@@ -11,7 +11,7 @@ const EVERY   = { 1: 5, 2: 3, 3: 2 };            // act every Nth tick: 500 / 30
 const AMOUNT  = { 1: 0.08, 2: 0.27, 3: 0.55 };   // share of characters swapped
 const CHANCE  = { 1: 0.25, 2: 0.55, 3: 0.90 };   // odds of scrambling vs showing the truth
 const SURGE_TICK = 2000;                          // ms between rolls
-const SURGE_CHANCE = { 1: 0.05, 2: 0.25, 3: 0 };  // 1-in-20, 1-in-4, never
+const SURGE_CHANCE = { 1: 0.15, 2: 0.25, 3: 0 };  // 15%, 25%, never
 const SURGE_MIN_MS = 110;                         // how long a spike lasts
 const SURGE_MAX_MS = 260;
 
@@ -78,7 +78,7 @@ function restore(entry) {
 }
 
 function tick() {
-    if (stabilized || document.hidden) { return; }
+    if (stabilized || document.hidden || REDUCED.matches) { return; }
 
     ticks++;
     for (const entry of entries) {
@@ -92,7 +92,7 @@ function tick() {
     }
 }
 
-/** Briefly slam on run up to level-3 distortion then let it fall back */
+/** Briefly slam one run up to level-3 distortion then let it fall back */
 function surge(entry) {
     if (entry.surging) { return; }
     entry.surging = true;
@@ -101,8 +101,26 @@ function surge(entry) {
     scramble(entry, 3);
 
     // Random duration so repeat surges never feel metronomic
-    const ms = SURGE_MIN
+    const ms = SURGE_MIN_MS + Math.random() * (SURGE_MAX_MS - SURGE_MIN_MS);
+    window.setTimeout(() => {
+        entry.el.classList.remove("glitch--surge");
+        restore(entry);
+        entry.surging = false;
+    }, ms);
 }
+
+/** The slow loop: roll once per glitched run. */
+function surgeTick() {
+    if (stabilized || document.hidden || REDUCED.matches) { return; }
+
+    for (const entry of entries) {
+        if (Math.random() < SURGE_CHANCE[entry.level]) {
+            surge(entry);
+        }
+    }
+}
+
+
 /** Re-scan after a render. Call with the element that was just drawn into. */
 export function refreshGlitch(root) {
     entries = [];
@@ -119,6 +137,7 @@ export function refreshGlitch(root) {
 export function startGlitch() {
     if (timer === null) {
         timer = setInterval(tick, BASE_TICK);
+        surgeTimer = setInterval(surgeTick, SURGE_TICK);
     }
 }
 

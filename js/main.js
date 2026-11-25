@@ -219,6 +219,7 @@ async function boot() {
 
     await resolveSession();
     wireHeader();
+    loadStabilized();
     updateHeader();
 
     // If we need to set up a display name still, open the panel
@@ -234,7 +235,6 @@ async function boot() {
     }
     initSearch(() => articleList);
 
-    loadStabilized();
     startGlitch();
 
     window.addEventListener("hashchange", route);
