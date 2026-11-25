@@ -40,7 +40,11 @@ export function renderArticle(article, container, linkTargets, gm) {
 
     const title = document.createElement("h1");
     title.className = "article-title";
-    title.textContent = article.title;
+    const titleText = document.createElement("span");
+    titleText.textContent = article.title;
+    applyGlitch(titleText, article.glitch || 0);
+    title.append(titleText);
+
     if (article.visible === false) {
         const badge = document.createElement("span");
         badge.className = article.author_name ? "badge badge--private" : "badge";
@@ -57,19 +61,23 @@ export function renderArticle(article, container, linkTargets, gm) {
     }
 
     for (const section of article.sections) {
-        root.append(renderSection(section, linkTargets));
+        root.append(renderSection(section, linkTargets, article.glitch || 0));
     }
 
     container.append(root);
 }
 
-function renderSection(section, linkTargets) {
+function renderSection(section, linkTargets, articleGlitch) {
     const wrap = document.createElement("section");
     wrap.className = "article-section";
 
     if (section.hidden) {
         wrap.classList.add("section--hidden");
     }
+    
+    // An article-wide glitch is a floor: a section may be worse, never better.
+    applyGlitch(wrap, Math.max(articleGlitch || 0, section.glitch || 0));
+
 
     if (section.heading) {
         const h = document.createElement("h2");
@@ -81,7 +89,8 @@ function renderSection(section, linkTargets) {
 
     const body = document.createElement("div");
     body.className = "section-body";
-    body.innerHTML = DOMPurify.sanitize(marked.parse(resolveWikiLinks(section.body, linkTargets)));
+    body.innerHTML = DOMPurify.sanitize(
+        marked.parse(resolveGlitch(resolveWikiLinks(section.body, linkTargets))));
     wrap.append(body);
 
     return wrap;
@@ -146,7 +155,13 @@ function renderGroups(articles, container) {
 
             const title = document.createElement("span");
             title.className = "index-link__title";
-            title.textContent = article.title;
+            const titleText = document.createElement("span");
+            titleText.textContent = article.title;
+            if (article.glitch > 0) {
+                // One level weaker in the list, but never silent.
+                applyGlitch(titleText, Math.max(1, article.glitch - 1));
+            }
+            title.append(titleText);
             link.append(title);
 
             if (article.visible === false) {
@@ -195,4 +210,19 @@ function resolveWikiLinks(body, linkTargets) {
         }
         return "[" + text + "](#/" + slug + ")";
     });
+}
+
+/**
+ * %%text%% / %%%text%%% / %%%%text%%%% -> a glitch span, level 1 / 2 / 3.
+ */
+function resolveGlitch(body) {
+    return body.replace(/(%{2,4})(.+?)\1/g, (match, marks, text) =>
+        '<span class="glitch glitch--' + (marks.length - 1) + '">' + text + "</span>");
+}
+
+/** Tag an element with a glitch level. Level 0 does nothing. */
+function applyGlitch(el, level) {
+    if (level > 0) {
+        el.classList.add("glitch", "glitch--" + level);
+    }
 }

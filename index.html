@@ -17,6 +17,43 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <!-- ===================== Glitch filters (Guide 12) =====================
+       The warp layer. feTurbulence makes noise; feDisplacementMap shoves the
+       rendered pixels around according to it. A very low X frequency with a
+       higher Y frequency gives horizontal tearing rather than a uniform blur.
+       The <animate> tags drive themselves, so this layer needs no JavaScript.
+       Levels are tuned: 1 faint, 2 unstable, 3 collapsing.
+       The oversized filter region stops displaced pixels being clipped. -->
+  <svg class="glitch-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <filter id="glitch-warp-1" x="-50%" y="-50%" width="200%" height="200%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.00001 0.05" numOctaves="1" seed="3" result="n">
+        <animate attributeName="baseFrequency" dur="7s" repeatCount="indefinite"
+                 values="0.00001 0.03;0.00001 0.07;0.00001 0.04;0.00001 0.03"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <filter id="glitch-warp-2" x="-50%" y="-50%" width="200%" height="200%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.00001 0.12" numOctaves="1" seed="7" result="n">
+        <animate attributeName="baseFrequency" dur="3.2s" repeatCount="indefinite"
+                 values="0.00001 0.08;0.00001 0.16;0.00001 0.10;0.00001 0.08"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="10"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <filter id="glitch-warp-3" x="-60%" y="-60%" width="220%" height="220%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.00001 0.28" numOctaves="2" seed="11" result="n">
+        <animate attributeName="baseFrequency" dur="2s" repeatCount="indefinite"
+                 values="0.00001 0.18;0.00001 0.40;0.00001 0.22;0.00001 0.18"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="20"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
   <div class="app">
 
     <header class="app-header">
@@ -32,6 +69,10 @@
           <input id="search-box" type="search" placeholder="Search the lore…" autocomplete="off">
           <div id="search-results" class="search-results is-hidden"></div>
         </div>
+
+        <!-- GM only: temporarily switch the glitch effect off so you can
+             actually read your own lore while prepping. JS unhides it. -->
+        <button id="stabilize-toggle" class="header-btn is-hidden" type="button">Stabilize</button>
 
         <button id="gm-login-toggle" class="header-btn" type="button">Sign in</button>
 

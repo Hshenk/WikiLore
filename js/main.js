@@ -5,6 +5,8 @@ import { initLive, fetchArticleList, fetchArticle, resolveSession,
          saveDisplayName, signUp } from "./live.js";
 import { openEditor } from "./editor.js";
 import { initSearch } from "./search.js";
+import { refreshGlitch, startGlitch, setStabilized, isStabilized,
+         loadStabilized } from "./glitch.js";
 
 
 let articleList = [];
@@ -29,6 +31,7 @@ async function route() {
 
     if (!slug) {
         renderIndex(articleList, content, isSignedIn());
+        refreshGlitch(content);
         return;
     }
 
@@ -63,6 +66,7 @@ async function route() {
             return;
         }
         renderArticle(article, content, linkTargets, gmActive());
+        refreshGlitch(content);
     } catch (err) {
         renderNotice(err.message, content, true);
     }
@@ -73,6 +77,12 @@ async function route() {
 function updateHeader() {
     const toggle = document.querySelector("#gm-login-toggle");
     const needsName = isSignedIn() && !gmActive() && !getDisplayName();
+
+    // Glitch text
+    const stabilize = document.querySelector("#stabilize-toggle");
+    stabilize.classList.toggle("is-hidden", !gmActive());
+    stabilize.classList.toggle("header-btn--on", isStabilized());
+
 
     document.querySelector("#gm-login-form").classList.toggle("is-hidden", isSignedIn());
     document.querySelector("#name-form").classList.toggle("is-hidden", !needsName);
@@ -128,6 +138,12 @@ function wireHeader() {
         await refreshData();
         route();
     });
+
+    document.querySelector("#stabilize-toggle").addEventListener("click", () => {
+        setStabilized(!isStabilized());
+        updateHeader();
+    });
+
 
     document.querySelector("#gm-signup").addEventListener("click", async () => {
         errorBox.classList.add("is-hidden");
@@ -217,6 +233,9 @@ async function boot() {
         return;
     }
     initSearch(() => articleList);
+
+    loadStabilized();
+    startGlitch();
 
     window.addEventListener("hashchange", route);
     route();

@@ -644,6 +644,7 @@ body.embed .article-map-link {
 }
 
 .editor input:not([type="checkbox"]),
+.editor select,
 .editor textarea {
   width: 100%;
   margin-top: 3px;
@@ -656,6 +657,7 @@ body.embed .article-map-link {
 }
 
 .editor input:focus,
+.editor select:focus,
 .editor textarea:focus {
   outline: none;
   border-color: var(--accent);
@@ -686,7 +688,10 @@ body.embed .article-map-link {
 }
 
 .ed-section-head .ed-heading {
-  flex: 1;
+  /* basis 0, so the heading absorbs whatever the fixed-width controls leave.
+     `flex: 1 1 auto` would use its width:100% as the basis and shrink badly. */
+  flex: 1 1 0;
+  min-width: 0;
   margin-top: 0;
 }
 
@@ -706,6 +711,132 @@ body.embed .article-map-link {
   margin: 0;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+/* The glitch level is a GM storytelling tool; openEditor adds .editor--player
+   for everyone else, which also covers section rows added after load. */
+.editor--player .ed-glitch,
+.editor--player #ed-glitch-field {
+  display: none;
+}
+
+/* Level dropdown in the editor: narrow enough to sit beside the checkboxes. */
+/* Two classes (0,2,0) so this outranks `.editor select` (0,1,1) above, which
+   sets width:100% - at 100% the select becomes a huge flex item and squashes
+   the heading input next to it. */
+.editor .ed-glitch {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.ed-section-head .ed-glitch {
+  margin-top: 0;
+}
+
+/* ---------- Glitch: text the world is forgetting (Guide 12) ----------
+   Three stacked layers make the effect:
+     1. warp        - the SVG filters in index.html (pure markup, self-animating)
+     2. aberration  - the red/cyan text-shadow keyframes below
+     3. scrambling  - js/glitch.js swaps characters on a timer
+   Levels: 1 faint (about to be forgotten), 2 unstable (erased),
+           3 collapsing (further degraded).                                  */
+
+/* The filter definitions live in a zero-sized SVG; never show it. */
+.glitch-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+@keyframes glitch-ab-1 {
+  0%, 100% { text-shadow: .012em 0 rgba(255, 0, 64, .55), -.012em 0 rgba(0, 255, 225, .55); }
+  50%      { text-shadow: -.012em 0 rgba(255, 0, 64, .55), .012em 0 rgba(0, 255, 225, .55); }
+}
+
+@keyframes glitch-ab-2 {
+  0%, 100% { text-shadow: .03em 0 rgba(255, 0, 64, .7), -.03em 0 rgba(0, 255, 225, .7); }
+  33%      { text-shadow: -.04em 0 rgba(255, 0, 64, .7), .02em 0 rgba(0, 255, 225, .7); }
+  66%      { text-shadow: .02em .02em rgba(255, 0, 64, .7), -.03em 0 rgba(0, 255, 225, .7); }
+}
+
+@keyframes glitch-ab-3 {
+  0%, 100% { text-shadow: .05em 0 rgba(255, 0, 64, .85), -.05em 0 rgba(0, 255, 225, .85); }
+  25%      { text-shadow: -.07em .02em rgba(255, 0, 64, .85), .05em 0 rgba(0, 255, 225, .85); }
+  50%      { text-shadow: .06em -.02em rgba(255, 0, 64, .85), -.04em .02em rgba(0, 255, 225, .85); }
+  75%      { text-shadow: -.03em 0 rgba(255, 0, 64, .85), .07em .01em rgba(0, 255, 225, .85); }
+}
+
+/* Slightly wrong colour cast on anything affected. */
+.glitch {
+  color: #cfd6df;
+}
+
+/* steps() keeps the motion stuttery — smooth glitching reads as fake. */
+.glitch--1 {
+  filter: url(#glitch-warp-1);
+  animation: glitch-ab-1 4.5s steps(2, end) infinite;
+  opacity: .95;
+}
+
+.glitch--2 {
+  filter: url(#glitch-warp-2);
+  animation: glitch-ab-2 1.6s steps(3, end) infinite;
+  opacity: .9;
+}
+
+.glitch--3 {
+  filter: url(#glitch-warp-3);
+  animation: glitch-ab-3 .7s steps(4, end) infinite;
+  opacity: .82;
+}
+
+/* A surge (Guide 12b): a level-1 or level-2 run spikes to full collapse for a
+   fraction of a second. Added ALONGSIDE the base level class rather than
+   replacing it, so the element's true level is still readable from its
+   classes; declared after .glitch--3 so it wins at equal specificity. */
+.glitch--surge {
+  filter: url(#glitch-warp-3);
+  animation: glitch-ab-3 .7s steps(4, end) infinite;
+  opacity: .82;
+}
+
+/* A glitched link keeps its accent colour so it still reads as clickable. */
+.glitch a {
+  color: var(--accent);
+}
+
+/* GM "Stabilize": drop every visual layer. js/glitch.js separately restores
+   the real characters, so the article becomes fully readable. */
+body.is-stabilized .glitch {
+  filter: none;
+  animation: none;
+  opacity: 1;
+  color: inherit;
+  text-shadow: none;
+}
+
+/* Header button reads as engaged while stabilized. */
+.header-btn--on {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Still visibly wrong, just not moving. */
+@media (prefers-reduced-motion: reduce) {
+  .glitch--1,
+  .glitch--2,
+  .glitch--3,
+  .glitch--surge {
+    filter: none;
+    animation: none;
+    text-shadow: .03em 0 rgba(255, 0, 64, .6), -.03em 0 rgba(0, 255, 225, .6);
+  }
+
+  .glitch--1 { opacity: .9; }
+  .glitch--2 { opacity: .8; }
+  .glitch--3 { opacity: .7; }
 }
 
 /* ---------- Footer ---------- */
